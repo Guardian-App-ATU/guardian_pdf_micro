@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using pdf_microservice.Models;
 using Spire.Pdf;
 using Spire.Pdf.Graphics;
 
@@ -15,9 +16,16 @@ namespace pdf_microservice.Controllers
     [ApiController]
     public class Pdf : ControllerBase
     {
-        [HttpGet("requestPdf")]
-        public async Task<IActionResult> CreatePdf()
+        [HttpPost("requestPdf")]
+        public async Task<IActionResult> CreatePdf([FromBody] GeoArgument[] geoArguments)
         {
+            if (geoArguments.Length <= 0)
+            {
+                return BadRequest("No geo arguments passed");
+            }
+            
+            System.Diagnostics.Debug.WriteLine($"Geo arg lenght: {geoArguments.Length}");
+
             var document = new PdfDocument();
             var page = document.Pages.Add();
 
@@ -27,6 +35,18 @@ namespace pdf_microservice.Controllers
                 new PdfSolidBrush(Color.Black),
                 new PointF(10, 25)
             );
+            
+            for (var i = 0; i < geoArguments.Length; i++)
+            {
+                var geoArgument = geoArguments[i];
+
+                page.Canvas.DrawString(
+                    $"{i}: long ({geoArgument.Longitude}), lat ({geoArgument.Latitude}) at {geoArgument.Timestamp.ToLongDateString()}",
+                    new PdfFont(PdfFontFamily.Helvetica, 13f),
+                    new PdfSolidBrush(Color.Black),
+                    new PointF(10, 25 + 15 * (i + 1))
+                );
+            }
 
             var stream = new MemoryStream();
             document.SaveToStream(stream);
