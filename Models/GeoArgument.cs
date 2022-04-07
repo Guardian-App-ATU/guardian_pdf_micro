@@ -2,8 +2,8 @@ namespace pdf_microservice.Models;
 
 public class GeoArgument
 {
-    public double lat;
-    public double log;
+    public double Latitude { get; set; }
+    public double Longitude { get; set; }
 
-    public DateTime timestamp;
+    public DateTime Timestamp { get; set; } = DateTime.Now;
 }
